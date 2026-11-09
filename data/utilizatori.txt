@@ -1,0 +1,10 @@
+1;Popescu;Ion;22;ion.popescu@gmail.com;Parola123!
+2;Ionescu;Maria;25;maria.i@yahoo.com;P@rola456
+3;Radu;Andrei;19;andrei.r@ubbcluj.ro;Andrei123#
+4;Stan;Elena;30;elena.stan@outlook.com;El3na!stan
+5;Marin;Alexandru;21;alex.m@gmail.com;Al3xandru!
+6;Dumitru;Ana;28;ana.d@yahoo.com;An@123456
+7;Gheorghe;Cristi;24;cristi.g@ubbcluj.ro;Cr1st1@n!
+8;Matei;Ioana;27;ioana.m@outlook.com;Io@na1234
+9;Vasile;George;20;george.v@gmail.com;G3org3!v
+10;Mihai;Diana;23;diana.m@yahoo.com;D1ana!123
