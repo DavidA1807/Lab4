@@ -132,9 +132,7 @@ public class Console {
 
                     case "3":
                         System.out.println("\nLista Utilizatori");
-                        for (User u : srvUtilizator.getAllUsers()) {
-                            System.out.println(u);
-                        }
+                        srvUtilizator.getAllUsers().forEach(System.out::println);
                         break;
 
                     case "4":
@@ -159,9 +157,7 @@ public class Console {
 
                     case "6":
                         System.out.println("\nLista Prietenii");
-                        for (Friendship f : srvPrietenie.getAllFriendships()) {
-                            System.out.println(f);
-                        }
+                        srvPrietenie.getAllFriendships().forEach(System.out::println);
                         break;
 
                     case "7":

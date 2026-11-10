@@ -28,7 +28,7 @@ public interface Repository<ID, E extends Entity<ID>> {
     Iterable<E> findAll();
 
     /**
-     * Returnează entitățile care respectă un filtru (Predicate).
+     * Returnează entitățile care respectă un filtru
      * @param filter condiția de filtrare
      * @return lista entităților filtrate
      */
