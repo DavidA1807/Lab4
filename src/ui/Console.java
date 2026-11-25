@@ -121,19 +121,19 @@ public class Console {
             System.out.println("Pagina " + (pageNumber + 1) + " din " + totalPages + " (Total: " + totalElements + ")");
             page.getElementsOnPage().forEach(System.out::println);
 
-            System.out.println("\nNavigare: [N] Inainte | [P] Inapoi | [0] Revenire la meniu");
+            System.out.println("\nNavigare: [F] Inainte | [B] Inapoi | [0] Revenire la meniu");
             System.out.print("Alege optiunea: ");
             String cmd = scanner.nextLine().trim().toUpperCase();
 
             switch (cmd) {
-                case "N":
+                case "F":
                     if (pageNumber + 1 < totalPages) {
                         pageNumber++;
                     } else {
                         System.out.println("Esti deja pe ultima pagina!");
                     }
                     break;
-                case "P":
+                case "B":
                     if (pageNumber > 0) {
                         pageNumber--;
                     } else {
@@ -149,7 +149,7 @@ public class Console {
     }
 
     private void uiPaginatedUsers() {
-        navigatePages("Utilizatori (paginat)", pageable -> srvUtilizator.getUsersOnPage(pageable));
+        navigatePages("Utilizatori", pageable -> srvUtilizator.getUsersOnPage(pageable));
     }
 
     private void uiPaginatedFriends() {
