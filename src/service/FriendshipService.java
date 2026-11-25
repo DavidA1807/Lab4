@@ -4,7 +4,10 @@ import domain.Entity;
 import domain.Friendship;
 import domain.Tuple;
 import domain.User;
+import repository.FriendshipDbRepository;
 import repository.Repository;
+import util.paging.Page;
+import util.paging.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +95,7 @@ public class FriendshipService {
 
     /**
      * functie ce sterge toate prieteniile unui utilizator
+     * nu mai e folosita
      * @param userID id-ul utilizatorului
      */
     public void removeAllFriendshipsOfUser(Integer userID)
@@ -101,5 +105,30 @@ public class FriendshipService {
                 .map(Entity::getId)
                 .collect(Collectors.toList())
                 .forEach(friendshipRepository::delete);
+    }
+
+    /**
+     * returneaza pagina cu prietenii unui utilizator dat
+     * @param userId id-ul utilizatorului al carui prieteni sunt afisati
+     * @param pageable parametrii de paginare
+     * @return un obiect cu prietenii pe pagina data
+     */
+    public Page<User> getFriendsOnPage(Integer userId, Pageable pageable) {
+        if (userId == null) {
+            throw new IllegalArgumentException("ID-ul utilizatorului nu poate fi null!");
+        }
+        if (pageable == null) {
+            throw new IllegalArgumentException("Pageable nu poate fi null!");
+        }
+        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
+            throw new IllegalArgumentException("Numarul paginii trebuie sa fie >= 0, iar dimensiunea paginii > 0!");
+        }
+        if (UserRepository.findOne(userId).isEmpty()) {
+            throw new IllegalArgumentException("Utilizatorul cu id-ul " + userId + " nu exista!");
+        }
+        if (friendshipRepository instanceof FriendshipDbRepository friendshipDbRepo) {
+            return friendshipDbRepo.findFriendsOnPage(userId, pageable);
+        }
+        throw new UnsupportedOperationException("Paginarea prietenilor este disponibila doar pentru repository.type=DATABASE!");
     }
 }

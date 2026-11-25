@@ -13,6 +13,9 @@ import validator.UserValidator;
 import validator.Validator;
 import validator.ValidatorException;
 
+/**
+ * clasa principala ce ia toate datele validate si compileaza cele 12 cerinte
+ */
 public class Main{
     public static void main(String[] args)
     {
@@ -28,11 +31,12 @@ public class Main{
         Repository<Integer, User> userInMemoryRepository = factory.createUserRepository(userValidator);
         Repository<Tuple<Integer, Integer>, Friendship> friendshipInMemoryRepository = factory.createFriendshipRepository(friendshipValidator);
 
-        UserService userService = new UserService(userInMemoryRepository);
+        UserService userService = new UserService(userInMemoryRepository, friendshipInMemoryRepository);
         FriendshipService friendshipService = new FriendshipService(userInMemoryRepository, friendshipInMemoryRepository);
         CommunityService communityService = new CommunityService(userInMemoryRepository, friendshipInMemoryRepository);
 
-        Console console = new Console(userService, friendshipService, communityService);
+        int pageSize = factory.getPageSize();
+        Console console = new Console(userService, friendshipService, communityService, pageSize);
         console.run();
 
     }

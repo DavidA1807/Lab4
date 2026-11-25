@@ -51,4 +51,11 @@ public interface Repository<ID, E extends Entity<ID>> {
      * @return entitatea dacă e ștearsă, null dacă nu există
      */
     Optional<E> delete(ID id);
+
+    /**
+     * da update la o entitate
+     * @param entity entitatea noua
+     * @return
+     */
+    Optional<E> update(E entity);
 }

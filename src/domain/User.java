@@ -25,7 +25,7 @@ public class User extends Entity<Integer>{
         this.nume = nume;
         this.prenume = prenume;
         this.varsta = varsta;
-        this.adult = this.varsta >= 18;
+        this.adult = (varsta != null && varsta >= 18);
         this.email = email;
         this.parola = parola;
     }

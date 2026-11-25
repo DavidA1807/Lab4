@@ -5,6 +5,7 @@ import domain.Tuple;
 import domain.User;
 import validator.Validator;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumMap;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class RepositoryFactory {
                 throw new RepositoryException("Fișierul config.properties nu a fost găsit în src!");
             }
             properties.load(input);
-        } catch (Exception e) {
+        } catch (IOException | IllegalArgumentException e) {
             throw new RepositoryException("Eroare la încărcarea configurării: " + e.getMessage(), e);
         }
     }
@@ -108,5 +109,22 @@ public class RepositoryFactory {
         }
 
         return creator.apply(validator);
+    }
+
+    /**
+     * Citeste si valideaza dimensiunea paginii din fisierul config
+     * @return
+     */
+    public int getPageSize() {
+        String value = properties.getProperty("page.size", "5");
+        try {
+            int pageSize = Integer.parseInt(value.trim());
+            if (pageSize <= 0) {
+                throw new IllegalArgumentException("Proprietatea page.size trebuie sa fie > 0!");
+            }
+            return pageSize;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Proprietatea page.size din config.properties nu este un numar valid!");
+        }
     }
 }

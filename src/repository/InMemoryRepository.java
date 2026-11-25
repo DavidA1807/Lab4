@@ -53,4 +53,18 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
             throw new IllegalArgumentException("ID-ul nu poate fi null");
         return Optional.ofNullable(entities.remove(id));
     }
+    @Override
+    public Optional<E> update(E entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity must not be null!");
+        }
+        validator.validate(entity);
+
+        if (entity.getId() == null || !entities.containsKey(entity.getId())) {
+            return Optional.of(entity);
+        }
+
+        entities.put(entity.getId(), entity);
+        return Optional.empty();
+    }
 }

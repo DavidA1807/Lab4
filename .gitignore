@@ -28,3 +28,10 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+src/config.properties
+config.properties
+
+### Gradle ###
+.gradle/
+build/

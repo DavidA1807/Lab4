@@ -2,11 +2,13 @@ package repository;
 
 import domain.Entity;
 import validator.Validator;
+import validator.ValidatorException;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,7 +68,9 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
                         }
                     });
         } catch (IOException e) {
-            throw new RepositoryException("Eroare la citirea fișierului " + filename, e);
+            throw new RepositoryException("Eroare la citirea din fisierul: " + filename, e);
+        } catch (ValidatorException | IllegalArgumentException | DateTimeParseException | IndexOutOfBoundsException e) {
+            throw new RepositoryException("Date corupte sau invalide in fisierul: " + filename, e);
         }
     }
 
@@ -111,5 +115,14 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
         if(deleted.isPresent())
             writeToFile();
         return deleted;
+    }
+
+    @Override
+    public Optional<E> update(E entity) {
+        Optional<E> updated = super.update(entity);
+        if (updated.isEmpty()) {
+            writeToFile();
+        }
+        return updated;
     }
 }

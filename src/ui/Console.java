@@ -3,9 +3,13 @@ package ui;
 import domain.Friendship;
 import domain.User;
 import repository.CriteriiUtilizator;
+import repository.RepositoryException;
 import service.CommunityService;
 import service.FriendshipService;
 import service.UserService;
+import util.paging.Page;
+import util.paging.Pageable;
+import validator.ValidatorException;
 
 import java.util.List;
 import java.util.Scanner;
@@ -19,6 +23,7 @@ public class Console {
     private FriendshipService srvPrietenie;
     private CommunityService srvComunitate;
     private Scanner scanner;
+    private int pageSize;
 
     /**
      * constructor pentru consola
@@ -28,10 +33,11 @@ public class Console {
      * @param srvPrietenie serviceul prieteniilor
      * @param srvComunitate serviceul pentru analiza comunitatiilor(nr lor si cea mai sociabila)
      */
-    public Console(UserService srvUtilizator, FriendshipService srvPrietenie, CommunityService srvComunitate) {
+    public Console(UserService srvUtilizator, FriendshipService srvPrietenie, CommunityService srvComunitate, int pageSize) {
         this.srvUtilizator = srvUtilizator;
         this.srvPrietenie = srvPrietenie;
         this.srvComunitate = srvComunitate;
+        this.pageSize = pageSize;
         this.scanner = new Scanner(System.in);
     }
 
@@ -49,6 +55,9 @@ public class Console {
         System.out.println("7. Afiseaza numarul de comunitati");
         System.out.println("8. Afiseaza cea mai sociabila comunitate");
         System.out.println("9. Filtrare utilizatori dupa criterii");
+        System.out.println("10. Modifica utilizator");
+        System.out.println("11. Afiseaza utilizatorii paginat");
+        System.out.println("12. Afiseaza prietenii unui utilizator paginat");
         System.out.println("0. Iesire");
     }
     private void uiFilterUsers() {
@@ -96,6 +105,59 @@ public class Console {
             rezultate.forEach(System.out::println);
         }
     }
+    private <T> void navigatePages(String titlu, java.util.function.Function<Pageable, Page<T>> pageSupplier) {
+        int pageNumber = 0;
+        while (true) {
+            Page<T> page = pageSupplier.apply(new Pageable(pageNumber, pageSize));
+            int totalElements = page.getTotalNumberOfElements();
+            int totalPages = (int) Math.ceil((double) totalElements / pageSize);
+
+            System.out.println("\n=== " + titlu + " ===");
+            if (totalElements == 0) {
+                System.out.println("Nu exista elemente de afisat. (Pagina 0 din 0)");
+                return;
+            }
+
+            System.out.println("Pagina " + (pageNumber + 1) + " din " + totalPages + " (Total: " + totalElements + ")");
+            page.getElementsOnPage().forEach(System.out::println);
+
+            System.out.println("\nNavigare: [N] Inainte | [P] Inapoi | [0] Revenire la meniu");
+            System.out.print("Alege optiunea: ");
+            String cmd = scanner.nextLine().trim().toUpperCase();
+
+            switch (cmd) {
+                case "N":
+                    if (pageNumber + 1 < totalPages) {
+                        pageNumber++;
+                    } else {
+                        System.out.println("Esti deja pe ultima pagina!");
+                    }
+                    break;
+                case "P":
+                    if (pageNumber > 0) {
+                        pageNumber--;
+                    } else {
+                        System.out.println("Esti deja pe prima pagina!");
+                    }
+                    break;
+                case "0":
+                    return;
+                default:
+                    System.out.println("Comanda invalida! Foloseste N, P sau 0.");
+            }
+        }
+    }
+
+    private void uiPaginatedUsers() {
+        navigatePages("Utilizatori (paginat)", pageable -> srvUtilizator.getUsersOnPage(pageable));
+    }
+
+    private void uiPaginatedFriends() {
+        System.out.print("Introdu ID-ul utilizatorului: ");
+        Integer userId = Integer.parseInt(scanner.nextLine().trim());
+        navigatePages("Prietenii utilizatorului " + userId,
+                pageable -> srvPrietenie.getFriendsOnPage(userId, pageable));
+    }
     /**
      * porneste bucla principala, citeste comenziile si ruleaza comanda si verifica daca e valida(0-8)
      */
@@ -109,23 +171,22 @@ public class Console {
                 switch (optiune) {
                     case "1":
                         System.out.print("Nume: ");
-                        String firstName = scanner.nextLine();
+                        String nume = scanner.nextLine();
                         System.out.print("Prenume: ");
-                        String lastName = scanner.nextLine();
+                        String prenume = scanner.nextLine();
                         System.out.print("Varsta: ");
                         String varsta = scanner.nextLine();
                         System.out.print("Email: ");
                         String email = scanner.nextLine();
                         System.out.print("Parola: ");
                         String parola = scanner.nextLine();
-                        srvUtilizator.addUser(firstName, lastName, Integer.parseInt(varsta), email, parola);
-                        System.out.println("Utilizator adaugat cu succes!");
+                        User utilizatorAdaugat = srvUtilizator.addUser(nume, prenume, Integer.parseInt(varsta), email, parola);
+                        System.out.println("Utilizator adaugat cu succes! ID generat: " + utilizatorAdaugat.getId());
                         break;
 
                     case "2":
                         System.out.print("Introdu ID-ul utilizatorului de sters: ");
                         Integer idSters = Integer.parseInt(scanner.nextLine());
-                        srvPrietenie.removeAllFriendshipsOfUser(idSters);
                         srvUtilizator.deleteUser(idSters);
                         System.out.println("Utilizator sters!");
                         break;
@@ -172,6 +233,29 @@ public class Console {
                     case "9":
                         uiFilterUsers();
                         break;
+                    case "10":
+                        System.out.print("ID utilizator de modificat: ");
+                        Integer idModificat = Integer.parseInt(scanner.nextLine());
+                        System.out.print("Nume nou: ");
+                        String numeNou = scanner.nextLine();
+                        System.out.print("Prenume nou: ");
+                        String prenumeNou = scanner.nextLine();
+                        System.out.print("Varsta noua: ");
+                        int varstaNoua = Integer.parseInt(scanner.nextLine());
+                        System.out.print("Email nou: ");
+                        String emailNou = scanner.nextLine();
+                        System.out.print("Parola noua: ");
+                        String parolaNoua = scanner.nextLine();
+
+                        srvUtilizator.updateUser(idModificat, numeNou, prenumeNou, varstaNoua, emailNou, parolaNoua);
+                        System.out.println("Utilizator modificat cu succes!");
+                        break;
+                    case "11":
+                        uiPaginatedUsers();
+                        break;
+                    case "12":
+                        uiPaginatedFriends();
+                        break;
                     case "0":
                         System.out.println("Iesire program");
                         return;
@@ -180,9 +264,9 @@ public class Console {
                         System.out.println("Optiune invalida! Incearca din nou.");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Eroare: Te rog sa introduci un numar valid pentru ID!");
-            } catch (Exception e) {
-                System.out.println("Eroare: " + e.getMessage());
+                System.out.println("Eroare: Introdu un numar valid pentru ID sau varsta!");
+            } catch (ValidatorException | RepositoryException | IllegalArgumentException e) {
+                System.out.println(e.getMessage());
             }
         }
     }
